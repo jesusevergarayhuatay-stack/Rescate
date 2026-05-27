@@ -1,0 +1,17 @@
+﻿{
+  "short_name": "RescateAnimal",
+  "name": "Rescate Animal - Reporte y Rescate de Mascotas",
+  "icons": [
+    {
+      "src": "https://api.dicebear.com/7.x/shapes/svg?seed=rescue",
+      "type": "image/svg+xml",
+      "sizes": "512x512",
+      "purpose": "any"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#0f172a",
+  "theme_color": "#6366f1",
+  "display": "standalone",
+  "orientation": "portrait"
+}

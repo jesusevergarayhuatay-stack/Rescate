@@ -1,0 +1,421 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rescate Animal - Red Social de Reporte y Rescate de Mascotas</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Una plataforma progresiva para reportar, monitorear y rescatar animales vulnerables en situación de calle o emergencia en tiempo real.">
+  <meta name="keywords" content="rescate animal, reportar animales, PWA, mascotas vulnerables, red social de rescate, protectora de animales">
+  <meta name="author" content="Rescate Animal Co.">
+  <meta name="theme-color" content="#6366f1">
+  
+  <!-- Apple Touch Icon / PWA Capable -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="RescateAnimal">
+  
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="https://api.dicebear.com/7.x/shapes/svg?seed=rescue">
+  
+  <!-- Google Fonts & Icons -->
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+  <div id="app-container">
+    
+    <!-- ENCABEZADO / NAVBAR -->
+    <header>
+      <div class="logo-container" id="nav-logo-btn" style="cursor: pointer;">
+        <div class="logo-icon">🐾</div>
+        <div class="logo-text">Rescate Animal</div>
+      </div>
+      
+      <div class="nav-actions">
+        <!-- Botones de Navegación Condicionales -->
+        <button id="nav-feed-btn" class="btn btn-link active" style="display: none;">Feed</button>
+        <button id="nav-admin-btn" class="btn btn-link" style="display: none;">Panel Admin</button>
+        
+        <!-- Estado de Sesión de Usuario -->
+        <div id="user-session-widget" style="display: flex; align-items: center; gap: 10px;">
+          <!-- Se llenará dinámicamente -->
+        </div>
+      </div>
+    </header>
+
+    <main>
+      
+      <!-- ================= PANTALLA 1: AUTENTICACIÓN ================= -->
+      <section id="view-auth" class="view-section active">
+        <div class="auth-container">
+          <!-- Tarjeta de Login -->
+          <div id="auth-card-login" class="auth-card">
+            <div class="auth-header">
+              <h1 class="auth-title">Iniciar Sesión</h1>
+              <p class="auth-subtitle">Accede para reportar casos y unirte al rescate</p>
+            </div>
+            
+            <form id="form-login" onsubmit="return false;">
+              <div class="form-group">
+                <label for="login-email" class="form-label">Correo Electrónico</label>
+                <input type="email" id="login-email" class="form-input" placeholder="ejemplo@correo.com" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="login-password" class="form-label">Contraseña</label>
+                <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
+              </div>
+              
+              <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px; padding: 12px;">
+                Ingresar con Cuenta
+              </button>
+            </form>
+            
+            <div class="divider">o bien</div>
+            
+            <!-- Google SSO Button -->
+            <button id="btn-google-login" class="btn-google" type="button">
+              <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+              </svg>
+              Iniciar sesión con Google
+            </button>
+            
+            <div class="auth-switch">
+              ¿No tienes una cuenta? 
+              <button id="btn-switch-to-register" class="auth-switch-btn">Regístrate</button>
+            </div>
+          </div>
+
+          <!-- Tarjeta de Registro -->
+          <div id="auth-card-register" class="auth-card" style="display: none;">
+            <div class="auth-header">
+              <h1 class="auth-title">Crear Cuenta</h1>
+              <p class="auth-subtitle">Regístrate para reportar o sumarte como rescatista</p>
+            </div>
+            
+            <form id="form-register" onsubmit="return false;">
+              <div class="form-group">
+                <label for="reg-name" class="form-label">Nombre Completo</label>
+                <input type="text" id="reg-name" class="form-input" placeholder="Juan Pérez" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="reg-phone" class="form-label">Número de Teléfono</label>
+                <input type="tel" id="reg-phone" class="form-input" placeholder="+34 600 000 000" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="reg-email" class="form-label">Correo Electrónico</label>
+                <input type="email" id="reg-email" class="form-input" placeholder="ejemplo@correo.com" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="reg-password" class="form-label">Contraseña</label>
+                <input type="password" id="reg-password" class="form-input" placeholder="Mínimo 6 caracteres" minlength="6" required>
+              </div>
+              
+              <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px; padding: 12px;">
+                Crear Cuenta Nueva
+              </button>
+            </form>
+            
+            <div class="auth-switch">
+              ¿Ya tienes cuenta? 
+              <button id="btn-switch-to-login" class="auth-switch-btn">Inicia Sesión</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PANTALLA 2: VISTA PRINCIPAL (FEED) ================= -->
+      <section id="view-feed" class="view-section">
+        <div class="feed-header">
+          <div class="feed-title-container">
+            <h1 class="feed-title">Reportes Activos</h1>
+          </div>
+          
+          <!-- Filtros Rápidos -->
+          <div class="filters-container">
+            <button class="filter-badge active" data-filter="all">Todos los Casos</button>
+            <button class="filter-badge" data-filter="high">🚨 Emergencias (Alto)</button>
+            <button class="filter-badge" data-filter="active">🐾 Casos Activos</button>
+            <button class="filter-badge" data-filter="resolved">✅ Casos Resueltos</button>
+          </div>
+        </div>
+
+        <!-- Feed Grid -->
+        <div id="feed-grid-container" class="feed-grid">
+          <!-- Las tarjetas de reportes se inyectan dinámicamente -->
+        </div>
+      </section>
+
+      <!-- ================= PANTALLA 3: DETALLE Y CHAT ================= -->
+      <section id="view-detail" class="view-section">
+        <!-- Volver al feed link -->
+        <button id="btn-back-to-feed" class="btn btn-secondary" style="margin-bottom: 20px; align-self: flex-start;">
+          ← Volver al Feed
+        </button>
+
+        <div class="detalle-layout" id="detalle-content-container">
+          <!-- Llenado dinámicamente en app.js -->
+        </div>
+      </section>
+
+      <!-- ================= PANTALLA 5: VISTA DE ADMINISTRADOR ================= -->
+      <section id="view-admin" class="view-section">
+        <div class="admin-header">
+          <div class="admin-title-flex">
+            <div>
+              <h1 class="feed-title" style="margin-bottom: 4px;">Panel de Control y Supervisión</h1>
+              <p style="color: var(--text-muted); font-size: 0.9rem;">Gestión gerencial de reportes y cuentas de usuarios</p>
+            </div>
+            
+            <div style="display: flex; gap: 8px;">
+              <button id="btn-export-csv" class="btn btn-secondary">
+                📥 Exportar Datos (CSV)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pestañas Administrativas -->
+        <div class="admin-tabs">
+          <div id="tab-admin-reportes" class="admin-tab active">Reportes de Incidencias</div>
+          <div id="tab-admin-usuarios" class="admin-tab">Usuarios y Cuentas</div>
+        </div>
+
+        <!-- DATA GRID DE REPORTES -->
+        <div id="admin-table-reportes" class="grid-wrapper">
+          <table class="data-grid">
+            <thead>
+              <tr>
+                <th>Foto</th>
+                <th>ID</th>
+                <th>Especie</th>
+                <th>Ubicación</th>
+                <th>Vulnerabilidad</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="admin-tbody-reportes">
+              <!-- Carga dinámica -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- DATA GRID DE USUARIOS -->
+        <div id="admin-table-usuarios" class="grid-wrapper" style="display: none;">
+          <table class="data-grid">
+            <thead>
+              <tr>
+                <th>Avatar</th>
+                <th>Nombre Completo</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Rol</th>
+                <th>Estado Cuenta</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="admin-tbody-usuarios">
+              <!-- Carga dinámica -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- BOTÓN ACCIÓN FLOTANTE (REPORTE) -->
+    <button id="btn-floating-report" class="btn-float" style="display: none;" title="Reportar Caso">
+      +
+    </button>
+
+    <!-- ================= MODAL: NUEVO REPORTE ================= -->
+    <div id="modal-new-report" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2 class="modal-title">🚨 Reportar Animal Vulnerable</h2>
+          <button class="btn-close" id="btn-modal-close">&times;</button>
+        </div>
+        
+        <form id="form-new-report" onsubmit="return false;">
+          <div class="form-group">
+            <label class="form-label">Fotografía del Caso</label>
+            <div class="photo-upload-container" id="photo-dropzone">
+              <span class="upload-icon">📷</span>
+              <span id="photo-upload-label">Haz clic o arrastra una imagen aquí</span>
+              <img id="new-report-preview" class="photo-preview" src="#" alt="Vista previa">
+              <input type="file" id="new-report-photo" accept="image/*" style="display: none;" required>
+            </div>
+            <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">La imagen será comprimida localmente antes de subirse.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="report-especie" class="form-label">Especie de Animal</label>
+            <select id="report-especie" class="form-input" required>
+              <option value="" disabled selected>Selecciona especie...</option>
+              <option value="Perro">🐶 Perro</option>
+              <option value="Gato">🐱 Gato</option>
+              <option value="Ave">🐦 Ave</option>
+              <option value="Otro">🐾 Otro (Especificar en notas)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="report-vulnerabilidad" class="form-label">Nivel de Vulnerabilidad</label>
+            <select id="report-vulnerabilidad" class="form-input" required>
+              <option value="Bajo">🟢 Bajo (Estable / Sin peligro inmediato)</option>
+              <option value="Medio" selected>🟡 Medio (Riesgo moderado / Requiere ayuda)</option>
+              <option value="Alto">🔴 Alto (Emergencia de vida o muerte)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ubicación GPS (Automática)</label>
+            <div id="gps-indicator" class="gps-status">
+              🔄 Capturando coordenadas de dispositivo...
+            </div>
+            <!-- Inputs ocultos para lat/lon -->
+            <input type="hidden" id="report-lat">
+            <input type="hidden" id="report-lon">
+          </div>
+
+          <div class="form-group">
+            <label for="report-ubicacion-texto" class="form-label">Dirección / Referencia de Ubicación</label>
+            <input type="text" id="report-ubicacion-texto" class="form-input" placeholder="Ej. Frente al supermercado, esquina calle X con Y" required>
+          </div>
+
+          <div class="form-group">
+            <label for="report-notas" class="form-label">Notas e Indicaciones</label>
+            <textarea id="report-notas" class="form-input" rows="3" placeholder="Describe el estado de salud, comportamiento o rasgos característicos del animal..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;">
+            Publicar Reporte (🔴 Reportado)
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ================= MODAL: EDITAR REPORTE (ADMIN) ================= -->
+    <div id="modal-edit-report" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2 class="modal-title">✏️ Editar Reporte de Caso</h2>
+          <button class="btn-close" id="btn-edit-modal-close">&times;</button>
+        </div>
+        
+        <form id="form-edit-report" onsubmit="return false;">
+          <input type="hidden" id="edit-report-id">
+          
+          <div class="edit-form-grid">
+            <div class="form-group">
+              <label for="edit-report-especie" class="form-label">Especie</label>
+              <select id="edit-report-especie" class="form-input" required>
+                <option value="Perro">🐶 Perro</option>
+                <option value="Gato">🐱 Gato</option>
+                <option value="Ave">🐦 Ave</option>
+                <option value="Otro">🐾 Otro</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="edit-report-vulnerabilidad" class="form-label">Vulnerabilidad</label>
+              <select id="edit-report-vulnerabilidad" class="form-input" required>
+                <option value="Bajo">🟢 Bajo</option>
+                <option value="Medio">🟡 Medio</option>
+                <option value="Alto">🔴 Alto</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-report-estado" class="form-label">Estado del Caso</label>
+            <select id="edit-report-estado" class="form-input" required>
+              <option value="Reportado">🔴 Reportado</option>
+              <option value="En Rescate">🔵 En Rescate</option>
+              <option value="Resuelto">🟢 Resuelto</option>
+            </select>
+          </div>
+
+          <div class="edit-form-grid">
+            <div class="form-group">
+              <label for="edit-report-lat" class="form-label">Latitud</label>
+              <input type="number" step="any" id="edit-report-lat" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label for="edit-report-lon" class="form-label">Longitud</label>
+              <input type="number" step="any" id="edit-report-lon" class="form-input" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-report-ubicacion-texto" class="form-label">Ubicación (Texto)</label>
+            <input type="text" id="edit-report-ubicacion-texto" class="form-input" required>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-report-notas" class="form-label">Notas</label>
+            <textarea id="edit-report-notas" class="form-input" rows="3" required></textarea>
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-top: 10px;">
+            <button type="button" id="btn-edit-delete" class="btn btn-danger" style="flex: 1;">
+              Eliminar Caso
+            </button>
+            <button type="submit" class="btn btn-primary" style="flex: 2; padding: 12px;">
+              Guardar Cambios
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- TOAST NOTIFICACIÓN -->
+    <div id="toast">
+      <span id="toast-message">Mensaje de prueba</span>
+    </div>
+
+  </div>
+
+  <!-- Carga del Módulo de Aplicación -->
+  <script type="module">
+  import { initializeApp }  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth }        from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getStorage }     from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyAJlPafyVDKwWzvIInlR5e9F6HwCEOzl2s",
+    authDomain:        "rescate-animal-app-f984a.firebaseapp.com",
+    projectId:         "rescate-animal-app-f984a",
+    storageBucket:     "rescate-animal-app-f984a.firebasestorage.app",
+    messagingSenderId: "1002546025284",
+    appId:             "1:1002546025284:web:802da5ab7e7c84e82f7d11"
+  };
+
+  // Firebase inicializado y expuesto globalmente
+  // - firebaseApp → usado por app.js para obtener Storage en cada upload
+  // - auth        → para Google SSO
+  const app         = initializeApp(firebaseConfig);
+  window.firebaseApp = app;
+  window.auth        = getAuth(app);
+  window.storage     = getStorage(app); // precargado (opcional, app.js lo importa dinámicamente)
+</script>
+
+  <!-- Animación del spinner de carga (usada en loadingHTML de app.js) -->
+  <style>
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+  <script type="module" src="app.js?v=2"></script>
+</body>
+</html>
