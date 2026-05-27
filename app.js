@@ -456,8 +456,8 @@ async function openReportDetail(reporteId) {
         </div>
         <div class="detalle-meta-row">
           <div class="author-badge">
-            <img class="author-avatar" src="${autor.avatar_url}">
-            <span>Reportado por <strong>${autor.nombre_completo}</strong></span>
+            <img class="author-avatar" src="${autor.foto_perfil_url || autor.avatar_url}">
+            <span>Reportado por <strong>${autor.alias || autor.nombre_completo}</strong></span>
           </div>
           <span>•</span>
           <span>Fecha: ${fechaFmt}</span>

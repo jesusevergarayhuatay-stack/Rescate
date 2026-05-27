@@ -145,8 +145,8 @@ const sheetsAPI = {
       usuario_id:        currentUser.usuario_id,
       mensaje:           mensaje,
       fecha_comentario:  new Date().toISOString(),
-      autor_nombre:      currentUser.nombre_completo,
-      autor_avatar:      currentUser.avatar_url,
+      autor_nombre:      currentUser.alias || currentUser.nombre_completo,
+      autor_avatar:      currentUser.foto_perfil_url || currentUser.avatar_url,
       autor_rol:         currentUser.rol
     };
     return apiPost({ action: 'createComentario', comentario });
