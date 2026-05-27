@@ -42,7 +42,8 @@ const COL = {
     estado:        'estado_caso',
     fecha:         'fecha_creacion',     // app usa: fecha_reporte
     notas:         'notas',
-    ubicacion:     'ubicacion_texto'
+    ubicacion:     'ubicacion_texto',
+    reacciones:    'reacciones'
   },
   comentarios: {
     id:        'id_comentario',   // app usa: comentario_id
@@ -225,6 +226,29 @@ function doPost(e) {
         break;
       }
 
+      // ── Reaccionar a reporte ────────────────────────────────────────────
+      case 'reaccionar': {
+        const hojaR   = ss.getSheetByName('Reportes');
+        const dataR   = hojaR.getDataRange().getValues();
+        const headersR= dataR[0];
+        const idIdx   = headersR.indexOf(COL.reportes.id);
+        const reacIdx = headersR.indexOf(COL.reportes.reacciones);
+        if (reacIdx < 0) { result = { error: 'Columna "reacciones" no encontrada.' }; break; }
+        let found = false;
+        for (let i = 1; i < dataR.length; i++) {
+          if (String(dataR[i][idIdx]) === String(datos.reporteId)) {
+            const actual = parseInt(dataR[i][reacIdx]) || 0;
+            const nuevo  = Math.max(0, actual + (datos.delta || 1));
+            hojaR.getRange(i + 1, reacIdx + 1).setValue(nuevo);
+            result = { success: true, total: nuevo };
+            found  = true;
+            break;
+          }
+        }
+        if (!found) result = { error: 'Reporte no encontrado.' };
+        break;
+      }
+
       // ── Eliminar reporte (y sus comentarios) ─────────────────────────────
       case 'deleteReporte':
         result = deleteRow(ss, 'Reportes', COL.reportes.id, datos.id);
@@ -256,7 +280,8 @@ function normalizarReporte(r) {
     estado_caso:          r[COL.reportes.estado],
     fecha_reporte:        r[COL.reportes.fecha],
     notas:                r[COL.reportes.notas],
-    ubicacion_texto:      r[COL.reportes.ubicacion]
+    ubicacion_texto:      r[COL.reportes.ubicacion],
+    reacciones:           parseInt(r[COL.reportes.reacciones]) || 0
   };
 }
 

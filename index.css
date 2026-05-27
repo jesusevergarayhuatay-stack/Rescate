@@ -617,6 +617,65 @@ header {
   flex-grow: 1;
 }
 
+.reporte-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+}
+
+.btn-reaction {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  border-radius: var(--radius-full);
+  padding: 5px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.btn-reaction:hover {
+  border-color: var(--accent);
+  color: var(--text-main);
+}
+
+.btn-reaction.active {
+  background: var(--accent-glow);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-share-wa {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: hsla(142, 70%, 30%, 0.25);
+  border: 1px solid hsla(142, 70%, 45%, 0.4);
+  color: hsl(142, 70%, 60%);
+  border-radius: var(--radius-full);
+  padding: 5px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.btn-share-wa:hover {
+  background: hsla(142, 70%, 30%, 0.45);
+  color: hsl(142, 70%, 75%);
+}
+
 /* 3. VISTA DE DETALLE Y CHAT */
 .detalle-layout {
   display: grid;

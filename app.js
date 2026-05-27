@@ -395,9 +395,23 @@ async function renderFeed() {
           <span class="location-marker">📍</span>
           <span class="reporte-card-location" title="${reporte.ubicacion_texto}">${reporte.ubicacion_texto}</span>
         </div>
+        <div class="reporte-card-actions">
+          <button class="btn-reaction ${getReaccionados().includes(reporte.reporte_id) ? 'active' : ''}" data-id="${reporte.reporte_id}">
+            🐾 <span class="reaction-count">${reporte.reacciones || 0}</span>
+          </button>
+          <a class="btn-share-wa" href="https://wa.me/?text=${encodeURIComponent(`🐾 *Caso de rescate: ${reporte.especie}*\n📍 ${reporte.ubicacion_texto}\n⚠️ Vulnerabilidad: ${reporte.nivel_vulnerabilidad}\n\nAyuda a rescatar este animal: ${window.location.href}`)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+            📲 Compartir
+          </a>
+        </div>
       </div>`;
 
     card.addEventListener('click', () => openReportDetail(reporte.reporte_id));
+
+    card.querySelector('.btn-reaction').addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await handleReaccion(reporte.reporte_id, e.currentTarget);
+    });
+
     container.appendChild(card);
   });
 }
@@ -925,6 +939,47 @@ async function handleExportCSV() {
     showToast('CSV descargado.', 'success');
   } catch (err) {
     showToast('Error al exportar: ' + err.message, 'error');
+  }
+}
+
+// --- REACCIONES ---
+
+function getReaccionados() {
+  try { return JSON.parse(localStorage.getItem('reaccionados') || '[]'); } catch { return []; }
+}
+
+async function handleReaccion(reporteId, btn) {
+  if (!currentUser) { showToast('Inicia sesión para reaccionar.', 'error'); return; }
+
+  const reaccionados = getReaccionados();
+  const yaReaccionado = reaccionados.includes(reporteId);
+  const delta = yaReaccionado ? -1 : 1;
+
+  // Actualización optimista
+  const countEl = btn.querySelector('.reaction-count');
+  const actual  = parseInt(countEl.textContent) || 0;
+  countEl.textContent = actual + delta;
+  btn.classList.toggle('active', !yaReaccionado);
+
+  if (yaReaccionado) {
+    localStorage.setItem('reaccionados', JSON.stringify(reaccionados.filter(id => id !== reporteId)));
+  } else {
+    localStorage.setItem('reaccionados', JSON.stringify([...reaccionados, reporteId]));
+  }
+
+  try {
+    const res = await sheetsAPI.reaccionar(reporteId, delta);
+    if (res.total !== undefined) countEl.textContent = res.total;
+  } catch {
+    // Revertir si falla
+    countEl.textContent = actual;
+    btn.classList.toggle('active', yaReaccionado);
+    const revertido = getReaccionados();
+    if (yaReaccionado) {
+      localStorage.setItem('reaccionados', JSON.stringify([...revertido, reporteId]));
+    } else {
+      localStorage.setItem('reaccionados', JSON.stringify(revertido.filter(id => id !== reporteId)));
+    }
   }
 }
 

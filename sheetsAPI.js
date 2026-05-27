@@ -105,6 +105,10 @@ const sheetsAPI = {
     return apiPost({ action: 'deleteReporte', id });
   },
 
+  async reaccionar(reporteId, delta = 1) {
+    return apiPost({ action: 'reaccionar', reporteId, delta });
+  },
+
   // ── USUARIOS ───────────────────────────────────────────────────────────────
 
   async getUsuarios() {
