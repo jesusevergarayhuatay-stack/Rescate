@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'rescate-animal-v2';
+﻿const CACHE_NAME = 'rescate-animal-v3';
 const ASSETS = [
   './',
   './index.html',

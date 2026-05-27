@@ -105,7 +105,12 @@
                 <label for="reg-name" class="form-label">Nombre Completo</label>
                 <input type="text" id="reg-name" class="form-input" placeholder="Juan Pérez" required>
               </div>
-              
+
+              <div class="form-group">
+                <label for="reg-alias" class="form-label">Alias / Apodo <span style="color:var(--text-muted);font-size:0.8em;">(opcional)</span></label>
+                <input type="text" id="reg-alias" class="form-input" placeholder="Tu nombre en la comunidad">
+              </div>
+
               <div class="form-group">
                 <label for="reg-phone" class="form-label">Número de Teléfono</label>
                 <input type="tel" id="reg-phone" class="form-input" placeholder="+34 600 000 000" required>
@@ -377,6 +382,43 @@
               Guardar Cambios
             </button>
           </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ================= MODAL: PERFIL DE USUARIO ================= -->
+    <div id="modal-profile" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2 class="modal-title">👤 Mi Perfil</h2>
+          <button class="btn-close" id="btn-profile-close">&times;</button>
+        </div>
+
+        <form id="form-profile" onsubmit="return false;">
+          <!-- Foto de perfil -->
+          <div class="form-group" style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+            <div id="profile-photo-container" style="position:relative;cursor:pointer;" title="Cambiar foto de perfil">
+              <img id="profile-photo-preview" src="" alt="Foto de perfil"
+                style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);background:var(--bg-input);">
+              <div style="position:absolute;bottom:0;right:0;background:var(--accent);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;">📷</div>
+            </div>
+            <input type="file" id="profile-photo-input" accept="image/*" style="display:none;">
+            <small style="color:var(--text-muted);">Toca la foto para cambiarla</small>
+          </div>
+
+          <div class="form-group">
+            <label for="profile-alias" class="form-label">Alias / Apodo (público)</label>
+            <input type="text" id="profile-alias" class="form-input" placeholder="Ej. Rescatador_Lima, PatamiGo...">
+          </div>
+
+          <div class="form-group">
+            <label for="profile-phone" class="form-label">Número de Teléfono</label>
+            <input type="tel" id="profile-phone" class="form-input" placeholder="+51 900 000 000">
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;margin-top:10px;">
+            Guardar Cambios
+          </button>
         </form>
       </div>
     </div>

@@ -19,15 +19,17 @@ const ID_CARPETA_DRIVE = "1BUTL4qkbgxUH17sGsUz4U051Vt4citAh";
 // Si algún día renombras una columna en Sheets, solo edita aquí.
 const COL = {
   usuarios: {
-    id:       'id_usuario',          // app usa: usuario_id
-    nombre:   'nombre_completo',
-    telefono: 'telefono',
-    email:    'email',
-    password: 'password',
-    rol:      'rol',
-    estado:   'estado',
-    avatar:   'avatar_url',
-    fecha:    'fecha_registro'
+    id:        'id_usuario',          // app usa: usuario_id
+    nombre:    'nombre_completo',
+    telefono:  'telefono',
+    email:     'email',
+    password:  'password',
+    rol:       'rol',
+    estado:    'estado',
+    avatar:    'avatar_url',
+    alias:     'alias',
+    fotoPerfil:'foto_perfil_url',
+    fecha:     'fecha_registro'
   },
   reportes: {
     id:            'id_reporte',         // app usa: reporte_id
@@ -131,15 +133,17 @@ function doPost(e) {
         // Traduce nombres internos → nombres reales de la hoja
         const u = datos.usuario;
         const filaUsuario = {
-          [COL.usuarios.id]:       u.usuario_id,
-          [COL.usuarios.nombre]:   u.nombre_completo,
-          [COL.usuarios.telefono]: u.telefono,
-          [COL.usuarios.email]:    u.email,
-          [COL.usuarios.password]: u.password,
-          [COL.usuarios.rol]:      u.rol    || 'Usuario',
-          [COL.usuarios.estado]:   u.estado || 'Activo',
-          [COL.usuarios.avatar]:   u.avatar_url,
-          [COL.usuarios.fecha]:    new Date().toISOString()
+          [COL.usuarios.id]:         u.usuario_id,
+          [COL.usuarios.nombre]:     u.nombre_completo,
+          [COL.usuarios.telefono]:   u.telefono,
+          [COL.usuarios.email]:      u.email,
+          [COL.usuarios.password]:   u.password,
+          [COL.usuarios.rol]:        u.rol    || 'Usuario',
+          [COL.usuarios.estado]:     u.estado || 'Activo',
+          [COL.usuarios.avatar]:     u.avatar_url,
+          [COL.usuarios.alias]:      u.alias           || '',
+          [COL.usuarios.fotoPerfil]: u.foto_perfil_url || '',
+          [COL.usuarios.fecha]:      new Date().toISOString()
         };
         result = appendRow(ss, 'Usuarios', filaUsuario);
         break;
@@ -206,8 +210,12 @@ function doPost(e) {
       // ── Actualizar usuario ───────────────────────────────────────────────
       case 'updateUsuario': {
         const mapaU = {
-          rol:    COL.usuarios.rol,
-          estado: COL.usuarios.estado
+          rol:             COL.usuarios.rol,
+          estado:          COL.usuarios.estado,
+          alias:           COL.usuarios.alias,
+          telefono:        COL.usuarios.telefono,
+          foto_perfil_url: COL.usuarios.fotoPerfil,
+          avatar_url:      COL.usuarios.avatar
         };
         const updatesU = {};
         Object.entries(datos.updates || {}).forEach(([k, v]) => {
@@ -256,12 +264,14 @@ function normalizarUsuario(u) {
   return {
     usuario_id:      u[COL.usuarios.id],
     nombre_completo: u[COL.usuarios.nombre],
-    telefono:        u[COL.usuarios.telefono],
+    telefono:        u[COL.usuarios.telefono]  || '',
     email:           u[COL.usuarios.email],
     password:        u[COL.usuarios.password],
     rol:             u[COL.usuarios.rol],
     estado:          u[COL.usuarios.estado],
     avatar_url:      u[COL.usuarios.avatar],
+    alias:           u[COL.usuarios.alias]     || '',
+    foto_perfil_url: u[COL.usuarios.fotoPerfil]|| '',
     fecha_registro:  u[COL.usuarios.fecha]
   };
 }

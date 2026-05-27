@@ -52,21 +52,28 @@ const sheetsAPI = {
     return result.user;
   },
 
-  async registrarUsuario(nombre, telefono, email, password) {
+  async registrarUsuario(nombre, alias, telefono, email, password) {
     const newUser = {
-      usuario_id:     'usr_' + Date.now(),
+      usuario_id:      'usr_' + Date.now(),
       nombre_completo: nombre,
+      alias:           alias || '',
       telefono:        telefono,
       email:           email,
       password:        password,
       rol:             'Usuario',
       estado:          'Activo',
-      avatar_url:      `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(nombre)}`
+      avatar_url:      `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(nombre)}`,
+      foto_perfil_url: ''
     };
     await apiPost({ action: 'createUsuario', usuario: newUser });
     // Devolver usuario sin contraseña
     const { password: _pwd, ...safeUser } = newUser;
     return safeUser;
+  },
+
+  async actualizarPerfil(userId, datos) {
+    // datos puede incluir: alias, telefono, foto_perfil_url
+    return apiPost({ action: 'updateUsuario', id: userId, updates: datos });
   },
 
   // ── REPORTES ───────────────────────────────────────────────────────────────

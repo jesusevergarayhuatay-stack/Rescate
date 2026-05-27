@@ -144,6 +144,16 @@ function setupEventListeners() {
   // Exportar CSV
   document.getElementById('btn-export-csv').addEventListener('click', handleExportCSV);
 
+  // Modal perfil
+  document.getElementById('btn-profile-close').addEventListener('click', () => {
+    document.getElementById('modal-profile').classList.remove('active');
+  });
+  document.getElementById('profile-photo-container').addEventListener('click', () => {
+    document.getElementById('profile-photo-input').click();
+  });
+  document.getElementById('profile-photo-input').addEventListener('change', handleProfilePhotoSelection);
+  document.getElementById('form-profile').addEventListener('submit', handleProfileSave);
+
   // Modal editar reporte (admin)
   document.getElementById('btn-edit-modal-close').addEventListener('click', () => {
     document.getElementById('modal-edit-report').classList.remove('active');
@@ -187,14 +197,17 @@ function navigate(viewName) {
 function updateUserWidget() {
   const container = document.getElementById('user-session-widget');
   if (currentUser) {
+    const photoUrl    = currentUser.foto_perfil_url || currentUser.avatar_url;
+    const displayName = currentUser.alias || currentUser.nombre_completo.split(' ')[0];
     container.innerHTML = `
-      <span style="font-size:0.85rem;font-weight:600;color:var(--text-muted);display:flex;align-items:center;gap:8px;">
-        <img src="${currentUser.avatar_url}" style="width:28px;height:28px;border-radius:50%;background:var(--bg-input);">
-        ${currentUser.nombre_completo.split(' ')[0]}
+      <span id="btn-open-profile" style="font-size:0.85rem;font-weight:600;color:var(--text-muted);display:flex;align-items:center;gap:8px;cursor:pointer;" title="Mi Perfil">
+        <img src="${photoUrl}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;background:var(--bg-input);">
+        ${displayName}
         ${currentUser.rol === 'Administrador' ? '<span style="font-size:0.7rem;background:var(--accent);color:var(--text-main);padding:2px 6px;border-radius:4px;">Admin</span>' : ''}
       </span>
       <button id="btn-logout" class="btn btn-secondary btn-icon" title="Cerrar Sesión">🚪</button>
     `;
+    document.getElementById('btn-open-profile').addEventListener('click', openProfileModal);
     document.getElementById('btn-logout').addEventListener('click', handleLogout);
   } else {
     container.innerHTML = '';
@@ -228,6 +241,7 @@ async function handleLogin(e) {
 async function handleRegister(e) {
   e.preventDefault();
   const nombre   = document.getElementById('reg-name').value;
+  const alias    = document.getElementById('reg-alias').value;
   const telefono = document.getElementById('reg-phone').value;
   const email    = document.getElementById('reg-email').value;
   const password = document.getElementById('reg-password').value;
@@ -237,7 +251,7 @@ async function handleRegister(e) {
   btn.textContent = 'Creando cuenta...';
 
   try {
-    const user = await sheetsAPI.registrarUsuario(nombre, telefono, email, password);
+    const user = await sheetsAPI.registrarUsuario(nombre, alias, telefono, email, password);
     setCurrentUserSession(user);
     showToast('¡Registro exitoso! Sesión iniciada.', 'success');
     navigate('feed');
@@ -279,6 +293,7 @@ async function handleGoogleSSO() {
     } else {
       const newUser = await sheetsAPI.registrarUsuario(
         gUser.displayName || 'Usuario Google',
+        '',
         gUser.phoneNumber || '',
         gUser.email,
         'google_sso_' + gUser.uid
@@ -910,6 +925,93 @@ async function handleExportCSV() {
     showToast('CSV descargado.', 'success');
   } catch (err) {
     showToast('Error al exportar: ' + err.message, 'error');
+  }
+}
+
+// --- PERFIL DE USUARIO ---
+
+function openProfileModal() {
+  if (!currentUser) return;
+  const photoUrl = currentUser.foto_perfil_url || currentUser.avatar_url;
+  document.getElementById('profile-photo-preview').src = photoUrl;
+  document.getElementById('profile-alias').value       = currentUser.alias    || '';
+  document.getElementById('profile-phone').value       = currentUser.telefono || '';
+  document.getElementById('profile-photo-input').dataset.compressed = '';
+  document.getElementById('modal-profile').classList.add('active');
+}
+
+function handleProfilePhotoSelection() {
+  const fileInput = document.getElementById('profile-photo-input');
+  const preview   = document.getElementById('profile-photo-preview');
+  const file      = fileInput.files[0];
+  if (!file) return;
+
+  compressImage(file, 400, 400)
+    .then(base64 => {
+      fileInput.dataset.compressed = base64;
+      preview.src = base64;
+      showToast('Foto lista para subir.', 'success');
+    })
+    .catch(() => showToast('Error al procesar la imagen.', 'error'));
+}
+
+async function handleProfileSave(e) {
+  e.preventDefault();
+  const alias      = document.getElementById('profile-alias').value.trim();
+  const telefono   = document.getElementById('profile-phone').value.trim();
+  const fileInput  = document.getElementById('profile-photo-input');
+  const fotoBase64 = fileInput.dataset.compressed;
+  const btn        = e.target.querySelector('button[type="submit"]');
+
+  btn.disabled    = true;
+  btn.textContent = '⏳ Guardando...';
+
+  let fotoPerfil = currentUser.foto_perfil_url || '';
+
+  // Subir nueva foto de perfil a Firebase Storage si el usuario eligió una
+  if (fotoBase64) {
+    btn.textContent = '⏳ Subiendo foto...';
+    try {
+      const { getAuth, signInAnonymously } = await import(
+        'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
+      );
+      const { getStorage, ref, uploadString, getDownloadURL } = await import(
+        'https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js'
+      );
+      const auth = getAuth(window.firebaseApp);
+      if (!auth.currentUser) await signInAnonymously(auth);
+      const storage    = getStorage(window.firebaseApp);
+      const storageRef = ref(storage, `perfiles/${currentUser.usuario_id}.jpg`);
+      await uploadString(storageRef, fotoBase64, 'data_url');
+      fotoPerfil = await getDownloadURL(storageRef);
+    } catch (err) {
+      showToast('Error al subir foto: ' + err.message, 'error');
+      btn.disabled    = false;
+      btn.textContent = 'Guardar Cambios';
+      return;
+    }
+    btn.textContent = '⏳ Guardando...';
+  }
+
+  try {
+    await sheetsAPI.actualizarPerfil(currentUser.usuario_id, {
+      alias,
+      telefono,
+      foto_perfil_url: fotoPerfil
+    });
+
+    // Actualizar sesión local
+    currentUser = { ...currentUser, alias, telefono, foto_perfil_url: fotoPerfil };
+    localStorage.setItem('app_session_user', JSON.stringify(currentUser));
+    updateUserWidget();
+
+    document.getElementById('modal-profile').classList.remove('active');
+    showToast('¡Perfil actualizado con éxito!', 'success');
+  } catch (err) {
+    showToast('Error al guardar: ' + err.message, 'error');
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = 'Guardar Cambios';
   }
 }
 
